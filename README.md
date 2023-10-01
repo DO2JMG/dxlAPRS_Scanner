@@ -8,6 +8,13 @@ dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
   cd dxlAPRS_Scanner
   make
 ```
+
+### Run example :
+
+```
+  ./scanner -p 18051 -f 404000000 -s 2500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 &
+```
+
 ### Allowed options:
 
 Argument|Description|Value
