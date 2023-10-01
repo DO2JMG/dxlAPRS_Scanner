@@ -17,7 +17,7 @@ dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
 
 ### Changing parameters for sdrtst :
 
-Adding the following command line argument will enable to send Level table.
+Adding the following command line argument will enable to send Level table. Replace IP and port with your data, in the example they are just placeholders
 
 ```
   -L <ip>:<port>
