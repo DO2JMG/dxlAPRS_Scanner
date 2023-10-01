@@ -15,6 +15,12 @@ dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
   ./scanner -p 18051 -f 404000000 -s 2500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 &
 ```
 
+### Changing parameters for sdrtst :
+
+```
+  -L <ip>:<port>
+```
+
 ### Allowed options:
 
 Argument|Description|Value
