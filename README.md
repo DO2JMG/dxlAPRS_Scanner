@@ -25,6 +25,14 @@ Adding the following command line argument will enable to send Level table. Repl
   -L <ip>:<port>
 ```
 
+### Changing parameters for sdrcfg-rtl0.txt (Frequencies list):
+
+Adding the following line to your channel-file
+
+```
+  s 404.000 406.000 2500 6 3000
+```
+
 ### Blacklist example :
 
 Add frequencies in kilohertz to the list. Frequencies are separated by a new line.
