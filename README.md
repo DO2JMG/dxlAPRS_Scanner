@@ -8,5 +8,6 @@ Argument|Description|Value
 `-f`|Start frequency in Hz|`404000000`
 `-s`|Steps in Hz|`2500`
 `-p`|UDP-port from sdrtst|`18050`
+`-t`|Holding-Timer in seconds|`120`
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
 `-b`|Filename blacklist|blacklist.txt
