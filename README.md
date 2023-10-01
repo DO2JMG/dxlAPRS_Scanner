@@ -23,6 +23,15 @@ Adding the following command line argument will enable to send Level table. Repl
   -L <ip>:<port>
 ```
 
+### Blacklist example :
+
+Add frequencies in kilohertz to the list. Frequencies are separated by a new line.
+
+```
+  405320
+  404230
+```
+
 ### Allowed options:
 
 Argument|Description|Value
