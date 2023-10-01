@@ -8,6 +8,7 @@ dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
   cd dxlAPRS_Scanner
   make
 ```
+### Allowed options:
 
 Argument|Description|Value
 -|-|-
