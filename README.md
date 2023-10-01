@@ -1,7 +1,7 @@
 # dxlAPRS_Scanner
 dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
 
-This project contains sdr scanner written in c++ to scan and decode multiple frequencies in the same time.
+This project contains scanner written in c++ to scan and decode multiple frequencies in the same time.
 
 ### Unpack and compile :
 
