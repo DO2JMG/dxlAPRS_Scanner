@@ -6,9 +6,9 @@ LDFLAGS = -g
 
 OBJECTS = main.o
 
-all:		udp
+all:		scanner
 
-udp:	$(OBJECTS)
+scanner:	$(OBJECTS)
 		$(CXX) $(OBJECTS) $(CFLAGS) $(LIBS) -o scanner
 
 %.o: %.cpp
