@@ -47,7 +47,7 @@ Add frequencies in kilohertz to the list. Frequencies are separated by a new lin
 Argument|Description|Value
 -|-|-
 `-q`|Squelch|`65`
-`-v`|Verbouse mode|-
+`-v`|Verbouse mode|
 `-f`|Start frequency in Hz|`404000000`
 `-s`|Steps in Hz|`1000`
 `-p`|UDP-port from sdrtst to receive level table|`18050`
