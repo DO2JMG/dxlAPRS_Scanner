@@ -54,4 +54,4 @@ Argument|Description|Value
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
 `-b`|Filename blacklist|blacklist.txt
 `-n`|Level (Default is 5) > 5 lower sensitivity|`5`
-`-v`|Verbouse mode|
+`-v`|Verbous mode|
