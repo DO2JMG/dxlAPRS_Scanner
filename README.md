@@ -30,7 +30,7 @@ Adding the following command line argument will enable to send Level table. Repl
 Adding the following line to your channel-file
 
 ```
-  s 404.000 406.000 2500 6 3000
+  s 404.000 406.000 1000 6 3000
 ```
 
 ### Blacklist example :
