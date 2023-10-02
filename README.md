@@ -49,7 +49,7 @@ Argument|Description|Value
 `-q`|Squelch|`65`
 `-v`|Verbouse mode|-
 `-f`|Start frequency in Hz|`404000000`
-`-s`|Steps in Hz|`2500`
+`-s`|Steps in Hz|`1000`
 `-p`|UDP-port from sdrtst to receive level table|`18050`
 `-t`|Holding-Timer in seconds|`120`
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
