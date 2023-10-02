@@ -14,7 +14,7 @@ This project contains scanner written in c++ to scan and decode multiple frequen
 ### Run example :
 
 ```
-  ./scanner -p 18051 -f 404000000 -s 2500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 &
+  ./scanner -p 18051 -f 404000000 -s 2500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 -n 5 &
 ```
 
 ### Changing parameters for sdrtst :
