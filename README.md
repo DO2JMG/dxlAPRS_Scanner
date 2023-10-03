@@ -53,5 +53,5 @@ Argument|Description|Value
 `-t`|Holding-Timer in seconds|`120`
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
 `-b`|Filename blacklist|blacklist.txt
-`-n`|Level (Default is 5) > 5 lower sensitivity|`5`
+`-n`|Level (Default is 5) > 5 higher sensitivity|`5`
 `-v`|Verbous mode|
