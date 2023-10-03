@@ -14,7 +14,7 @@ This project contains scanner written in c++ to scan and decode multiple frequen
 ### Run example :
 
 ```
-  ./scanner -p 18051 -f 404000000 -s 2500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 -n 5 &
+  ./scanner -p 18051 -f 404000000 -s 1500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 -n 5 &
 ```
 
 ### Changing parameters for sdrtst :
@@ -30,7 +30,7 @@ Adding the following command line argument will enable to send Level table. Repl
 Adding the following line to your channel-file
 
 ```
-  s 404.000 406.000 1000 6 3000
+  s 404.000 406.000 1500 6 3000
 ```
 
 ### Blacklist example :
@@ -48,7 +48,7 @@ Argument|Description|Value
 -|-|-
 `-q`|Squelch|`65`
 `-f`|Start frequency in Hz|`404000000`
-`-s`|Steps in Hz|`1000`
+`-s`|Steps in Hz|`1500`
 `-p`|UDP-port from sdrtst to receive level table|`18050`
 `-t`|Holding-Timer in seconds|`120`
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
