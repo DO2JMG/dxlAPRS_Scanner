@@ -25,6 +25,14 @@ Adding the following command line argument will enable to send Level table. Repl
   -L <ip>:<port>
 ```
 
+### Changing parameters for sondeudp :
+
+Adding the following command line argument will enable to send decoded data. Replace IP and port with your data, in the example they are just placeholders
+
+```
+  -M <ip>:<port>
+```
+
 ### Changing parameters for sdrcfg-rtl0.txt (Frequencies list):
 
 Adding the following line to your channel-file
