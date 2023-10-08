@@ -8,6 +8,8 @@ This project contains scanner written in c++ to scan and decode multiple frequen
 ```
   git clone https://github.com/DO2JMG/dxlAPRS_Scanner.git
   cd dxlAPRS_Scanner
+  mkdir build
+  cmake ..
   make
 ```
 
