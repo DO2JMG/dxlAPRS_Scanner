@@ -13,6 +13,12 @@ This project contains scanner written in c++ to scan and decode multiple frequen
   make
 ```
 
+### Stop all :
+
+```
+  killall scanner
+```
+
 ### Run example :
 
 ```
