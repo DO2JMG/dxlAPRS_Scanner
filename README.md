@@ -13,16 +13,16 @@ This project contains scanner written in c++ to scan and decode multiple frequen
   make
 ```
 
-### Stop all :
-
-```
-  killall scanner
-```
-
 ### Run example :
 
 ```
   ./scanner -p 18051 -f 404000000 -s 1500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 -n 5 &
+```
+
+### Stop :
+
+```
+  killall scanner
 ```
 
 ### Changing parameters for sdrtst :
