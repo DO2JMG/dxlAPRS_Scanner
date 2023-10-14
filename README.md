@@ -66,6 +66,7 @@ Argument|Description|Value
 `-f`|Start frequency in Hz|`404000000`
 `-s`|Steps in Hz|`1500`
 `-p`|UDP-port from sdrtst to receive level table|`18050`
+`-u`|UDP-port from sondeudp to receive info|`17050`
 `-t`|Holding-Timer in seconds|`120`
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
 `-b`|Filename blacklist|blacklist.txt
