@@ -52,18 +52,6 @@ vector<int> peaks;
 vector<frequency_list> vfq;
 vector<int> vbl;
 
-std::vector<int> peakDecimation(const std::vector<int>& input, int decimationFactor) {
-    std::vector<int> output;
-    for (size_t i = 0; i < input.size(); i += decimationFactor) {
-        int maxVal = input[i];
-        for (int j = 1; j < decimationFactor && i + j < input.size(); ++j) {
-            maxVal = std::max(maxVal, input[i + j]);
-        }
-        output.push_back(maxVal);
-    }
-    return output;
-}
-
 bool frequencyisonlist(double fq) {
   if (peaks.size() > 0) {
     for (long unsigned i = 0; i < (peaks.size()); i++) {
