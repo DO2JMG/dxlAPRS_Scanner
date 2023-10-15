@@ -11,6 +11,7 @@ I would be very happy about ideas and further developments!
   git clone https://github.com/DO2JMG/dxlAPRS_Scanner.git
   cd dxlAPRS_Scanner
   mkdir build
+  cd build
   cmake ..
   make
 ```
