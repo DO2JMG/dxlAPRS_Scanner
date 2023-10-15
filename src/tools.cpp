@@ -1,3 +1,9 @@
+// dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
+
+// Copyright (C) Jean-Michael Grobel (DO2JMG) <do2jmg@wettersonde.net>
+
+// Released under GNU GPL v3 or later
+
 #include <iostream>
 #include <string>
 #include <vector>
