@@ -22,9 +22,17 @@
 using namespace std;
 using namespace tools;
 
+#define bw_RS41 7
+#define bw_RS92 7
+#define bw_M10M20 22
+#define bw_IMET 8
+#define bw_DFM 12
+#define bw_MEISEI 15
+
 struct scanner_config {
   bool verbous = false;
-  int port = 0; 
+  int sdrtst_port = 0; 
+  int sondeudp_port = 0; 
   int steps = 0;
   int startfrequency = 0;
   int cmn = 100;
@@ -34,6 +42,7 @@ struct scanner_config {
   int squelch = 65; 
   int timer_peaks = 30; // refresh frequency list after 60 seconds
   int timer_holding = 180; // frequencies clear after 120 seconds
+  int timer_serial = 60;
   int level = 5;
   string filename;
   string blacklist;
@@ -43,6 +52,7 @@ struct frequency_list {
   int frequency;
   int bandwidth;
   int timestamp;
+  int afc = 5;
   string serial;
 };
 
@@ -62,7 +72,8 @@ bool frequencyisonlist(double fq) {
   }
   return false;
 }
-int receivedata() {
+
+int receive_sdrtst() {
   int serSockDes;
   struct sockaddr_in serAddr, cliAddr;
   socklen_t cliAddrLen;
@@ -74,7 +85,7 @@ int receivedata() {
   }
 
   serAddr.sin_family = AF_INET;
-  serAddr.sin_port = htons(config.port);
+  serAddr.sin_port = htons(config.sdrtst_port);
   serAddr.sin_addr.s_addr = INADDR_ANY;
 
   if ((bind(serSockDes, (struct sockaddr*)&serAddr, sizeof(serAddr))) < 0) {
@@ -94,7 +105,7 @@ int receivedata() {
 
 
     if (buffer[0] == 'S' && buffer[1] == 'D' && buffer[2] == 'R' && buffer[3] == 'L' && readStatus > 0) { // receive data from sdrtst
-      debug("------------- Receiving data from port " + to_string(config.port), false);
+      debug("------------- Receiving data from port " + to_string(config.sdrtst_port), false);
 
       int dlen = sizeof(buffer);
 
@@ -111,9 +122,9 @@ int receivedata() {
 
       // calculateing average
 
-      debug("DB Count : " + to_string(db.size()) , true);
+      if (config.verbous) debug("DB Count : " + to_string(db.size()) , true);
 
-      debug("Calculateing average", false);
+      if (config.verbous) debug("Calculateing average", false);
 
       int avg_all = 0;
       int avg_min = 1024;
@@ -162,6 +173,85 @@ int receivedata() {
         }
       } 
     
+    } else {
+      close(serSockDes);
+      exit(-1);
+    }
+  }
+  close(serSockDes);
+  return 0;
+}
+
+int receive_sondeudp() {
+  int serSockDes;
+  struct sockaddr_in serAddr, cliAddr;
+  socklen_t cliAddrLen;
+  char buffer[1500] = {0};
+
+  if ((serSockDes = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    debug("socket creation error...", false);
+    exit(-1);
+  }
+
+  serAddr.sin_family = AF_INET;
+  serAddr.sin_port = htons(config.sondeudp_port);
+  serAddr.sin_addr.s_addr = INADDR_ANY;
+
+  if ((bind(serSockDes, (struct sockaddr*)&serAddr, sizeof(serAddr))) < 0) {
+    debug("binding error...", false);
+    close(serSockDes);
+    exit(-1);
+  }
+
+  cliAddrLen = sizeof(cliAddr);
+
+
+  while (true) {
+    int readStatus = recvfrom(serSockDes, buffer, sizeof(buffer), 0, (struct sockaddr*)&cliAddr, &cliAddrLen);
+
+
+    if (buffer[0] == 'R' && buffer[1] == 'X' && readStatus > 0) { // receive data from sondeudp
+      debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
+
+      cout << buffer << "\n";
+      string s = buffer;
+
+      vector<string> tokens = splitString(s);
+
+      string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
+   
+      for (long unsigned i = 0; i < (vfq.size()); i++) {
+        string vfgFQ = to_string(vfq[i].frequency);
+        if (vfgFQ.substr(0, 5) == tempFQ) {
+          vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
+          if (tokens[1] == "RS41") {
+            vfq[i].bandwidth = bw_RS41;
+          }
+          if (tokens[1] == "RS92") {
+            vfq[i].bandwidth = bw_RS92;
+          }
+          if (tokens[1] == "DFM") {
+            vfq[i].bandwidth = bw_DFM;
+          }
+          if (tokens[1] == "RS41") {
+            vfq[i].bandwidth = bw_RS41;
+          }
+          if (tokens[1] == "M10") {
+            vfq[i].bandwidth = bw_M10M20;
+          }
+          if (tokens[1] == "M20") {
+            vfq[i].bandwidth = bw_M10M20;
+          }
+          if (tokens[1] == "IMET") {
+            vfq[i].bandwidth = bw_IMET;
+          }
+          if (tokens[1] == "MEIS") {
+            vfq[i].bandwidth = bw_MEISEI;
+          }
+        }
+      }
+      tempFQ = "";
+
     } else {
       close(serSockDes);
       exit(-1);
@@ -227,6 +317,7 @@ int getpeaks() {
           fq = (fqh - fql);
           nfq.bandwidth = fq;
           if (nfq.bandwidth > config.maxbw) {nfq.bandwidth = config.maxbw; }
+          if (nfq.bandwidth > 15000) {nfq.afc  = 8; }
 
           fq = fq / 2;
           fq = (fq > (floor(fq)+0.5f)) ? ceil(fq) : floor(fq);
@@ -272,11 +363,16 @@ int getpeaks() {
         debug(to_string(vfge.frequency) + " " + to_string(vfge.bandwidth) + " " + to_string(vfge.timestamp), false);
         string out_frequency = to_string(vfge.frequency);
 
-        out.append("f " + out_frequency.insert(3, ".") + " 5 " + to_string(config.squelch) + " 0 " + to_string(vfge.bandwidth * 1000) + "\n");
+        out.append("f " + out_frequency.insert(3, ".") + " " + to_string(vfge.afc) + " " + to_string(config.squelch) + " 0 " + to_string(vfge.bandwidth * 1000) + " \t# " + vfge.serial + "\n");
       }
       for (i = 0; i < vfq.size(); i++) { 
         if ( (gettimestamp() - vfq[i].timestamp) > config.timer_holding) { //check timestamp and remove from list
           vfq.erase(vfq.begin() + i);
+        }
+        if ( (gettimestamp() - vfq[i].timestamp) > config.timer_serial) { //check serial and remove from list
+          if (vfq[i].serial.length() < 8) {
+            vfq.erase(vfq.begin() + i);
+          }
         }
       }
 
@@ -309,7 +405,15 @@ int main(int argc, char** argv) {
     }
     if (strcmp(argv[i],"-p") == 0) { // port sdrtst -L <ip>:<port>
       if(i+1 < argc) {
-        config.port = stoi(argv[i+1]);
+        config.sdrtst_port = stoi(argv[i+1]);
+      } else {
+        debug("Error : Port", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-u") == 0) { // port sondeudp -M <ip>:<port>
+      if(i+1 < argc) {
+        config.sondeudp_port = stoi(argv[i+1]);
       } else {
         debug("Error : Port", false);
         return 0;
@@ -374,9 +478,11 @@ int main(int argc, char** argv) {
     } 
   }
 
-  thread thread_receivedata (receivedata); // thread for receiving data via udp
+  thread thread_receive_sdrtst (receive_sdrtst); // thread for receiving data via udp
+  thread thread_receive_sondeudp(receive_sondeudp);
   thread thread_getpeaks (getpeaks); //thread for calculating frequencies       
 
-  thread_receivedata.join();                
+  thread_receive_sdrtst.join();
+  thread_receive_sondeudp .join();              
   thread_getpeaks.join();             
 }
