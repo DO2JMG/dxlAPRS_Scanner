@@ -3,6 +3,8 @@ dxlAPRS_scanner - dxlAPRS extension for scanning frequencies
 
 This project contains scanner written in c++ to scan and decode multiple frequencies in the same time.
 
+I would be very happy about ideas and further developments!
+
 ### Unpack and compile :
 
 ```
