@@ -61,6 +61,16 @@ Add frequencies in kilohertz to the list. Frequencies are separated by a new lin
   404230
 ```
 
+### White example :
+
+Add frequencies in kilohertz and bandwidth in khz to the list. Frequencies are separated by a new line.
+
+```
+  405700,6
+  402300,6
+  401100,6
+```
+
 ### Allowed options:
 
 Argument|Description|Value
@@ -73,5 +83,6 @@ Argument|Description|Value
 `-t`|Holding-Timer in seconds|`120`
 `-o`|Filename frequencies|sdrcfg-rtl0.txt
 `-b`|Filename blacklist|blacklist.txt
+`-w`|Filename whitelist|whitelist.txt
 `-n`|Level (Default is 5) > 5 higher sensitivity|`5`
 `-v`|Verbous mode|
