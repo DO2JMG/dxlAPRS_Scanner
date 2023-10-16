@@ -22,10 +22,10 @@
 using namespace std;
 using namespace tools;
 
-#define bw_RS41 7
-#define bw_RS92 7
-#define bw_M10M20 22
-#define bw_IMET 8
+#define bw_RS41 6
+#define bw_RS92 12
+#define bw_M10M20 18
+#define bw_IMET 12
 #define bw_DFM 12
 #define bw_MEISEI 15
 
@@ -46,6 +46,7 @@ struct scanner_config {
   int level = 5;
   string filename;
   string blacklist;
+  string whitelist;
 };
 
 struct frequency_list {
@@ -61,6 +62,7 @@ scanner_config config;
 vector<int> peaks;
 vector<frequency_list> vfq;
 vector<int> vbl;
+vector<frequency_list> vwl;
 
 bool frequencyisonlist(double fq) {
   if (peaks.size() > 0) {
@@ -213,7 +215,6 @@ int receive_sondeudp() {
     if (buffer[0] == 'R' && buffer[1] == 'X' && readStatus > 0) { // receive data from sondeudp
       debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
 
-      cout << buffer << "\n";
       string s = buffer;
 
       vector<string> tokens = splitString(s);
@@ -289,6 +290,32 @@ int getpeaks() {
 
     //--------------------------
 
+    // Load whitelist
+
+    vwl.clear(); // clear whitelist
+
+    fstream wlf;
+
+    wlf.open(config.whitelist,ios::in);
+    if (wlf.is_open()) { 
+      string line;
+      while(getline(wlf, line)) {
+        if (line.length() > 3) {
+          frequency_list wfl;
+
+          vector<string> tokens = splitString(line);
+
+          wfl.frequency = stoi(tokens[0]);
+          wfl.bandwidth = stoi(tokens[1]);
+
+          vwl.push_back(wfl);
+          if (config.verbous) debug(line, false);
+        }
+      }
+    }
+
+    //--------------------------
+
     sort(std::begin(peaks), std::end(peaks)); // sort peaks
 
     int i = 0;
@@ -346,6 +373,13 @@ int getpeaks() {
             }
           }
 
+          for (i = 0; i < vwl.size(); i++) { 
+            int frequency_check = rounded_frequency;
+            if (to_string(frequency_check) == to_string(vwl[i].frequency)) { //check frequency is on the whitelist
+              ison = true;
+            }
+          }
+
           if (ison == false && nfq.bandwidth > config.minbw) {
             nfq.frequency = (rounded_frequency); // add frequency to the list
             nfq.timestamp = gettimestamp();
@@ -358,6 +392,14 @@ int getpeaks() {
       }
       debug(to_string(vfq.size()) + " frequencies saved in the list", false);
       string out = "# created with dxlAPRS_scanner\n\n";
+
+      for (i = 0; i < vwl.size(); i++) { 
+        if ((vwl[i].frequency) > (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
+          string out_frequency = to_string(vwl[i].frequency);
+
+          out.append("f " + out_frequency.insert(3, ".") + " 5 " + to_string(config.squelch) + " 0 " + to_string(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
+        }
+      }
 
       for (auto& vfge : vfq) { // creating the frequencieslist for dxlAPRS
         debug(to_string(vfge.frequency) + " " + to_string(vfge.bandwidth) + " " + to_string(vfge.timestamp), false);
@@ -468,11 +510,19 @@ int main(int argc, char** argv) {
         return 0;
       }
     } 
-    if (strcmp(argv[i],"-n") == 0) {
+    if (strcmp(argv[i],"-n") == 0) { // Level
       if(i+1 < argc) {
         config.level = stoi(argv[i+1]);
       } else {
         debug("Error : Level", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-w") == 0) { // Whitelist
+      if(i+1 < argc) {
+        config.whitelist = argv[i+1];
+      } else {
+        debug("Error : Whitelist", false);
         return 0;
       }
     } 
