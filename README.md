@@ -19,7 +19,7 @@ I would be very happy about ideas and further developments!
 ### Run example :
 
 ```
-  ./scanner -p 18051 -u 17051 -f 404000000 -s 1500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -q 55 -n 5 &
+  ./scanner -p 18051 -u 17051 -f 404000000 -s 1500 -v -o sdrcfg-rtl0.txt -b blacklist.txt -w whitelist.txt -q 55 -n 5 &
 ```
 
 ### Stop :
