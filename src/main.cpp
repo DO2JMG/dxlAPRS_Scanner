@@ -220,6 +220,8 @@ int receive_sondeudp() {
 
       string s = buffer;
 
+      cout << s << "\n";
+
       if (s.length() > 20) {
         vector<string> tokens = splitString(s);
         if (tokens.size() >= 2) {
