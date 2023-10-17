@@ -219,11 +219,18 @@ int receive_sondeudp() {
       debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
 
       string s = buffer;
-
       cout << s << "\n";
 
-      if (s.length() > 20) {
+      int cc = countCharacters(s, ',');
+  
+      if (s.length() > 20 && cc > 1) {
+
         vector<string> tokens = splitString(s);
+
+        cout << tokens[0] << "\n";
+        cout << tokens[1] << "\n";
+        cout << tokens[2] << "\n";
+
         if (tokens.size() >= 2) {
           string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
       

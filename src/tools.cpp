@@ -48,7 +48,7 @@ namespace tools {
     return t;
   }
 
-  vector<std::string> splitString(const std::string& str) {
+  vector<string> splitString(const string& str) {
       std::vector<std::string> tokens;
       try {
         std::vector<std::string> tokens;
@@ -74,4 +74,14 @@ namespace tools {
 
       return result;
   } 
+
+  int countCharacters(const string& text, char targetChar) {
+    int count = 0;
+    for (char c : text) {
+        if (c == targetChar) {
+            count++;
+        }
+    }
+    return count;
+  }
 }
