@@ -91,8 +91,8 @@ Argument|Description|Value
 
 Argument|Description|Value
 -|-|-
-`-ts`|Tuner Settings 1 = enabled - 0 = disabeled|`0 or 1`
+`-ts`|Tuner Settings 1 = enabled - 0 = disabled|`0 or 1`
 `-tga`|Tuner auto gain 0 = automatic - 1 = manual |`0 or 1`
-`-tgc`|Tuner gain correction 1 = enabled - 0 = disabeled|`0 or 1`
+`-tgc`|Tuner gain correction 1 = enabled - 0 = disabled|`0 or 1`
 `-tp`|Tuner ppm|`0`
 `-tg`|Tuner gain|`0 - 49`
