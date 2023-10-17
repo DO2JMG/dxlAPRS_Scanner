@@ -44,6 +44,11 @@ struct scanner_config {
   int timer_holding = 180; // frequencies clear after 120 seconds
   int timer_serial = 60;
   int level = 5;
+  int tuner_settings = 0;
+  int tuner_gain = 0;
+  int tuner_auto_gain = 0;
+  int tuner_gain_correction = 1;
+  int tuner_ppm = 0;
   string filename;
   string blacklist;
   string whitelist;
@@ -207,52 +212,56 @@ int receive_sondeudp() {
 
   cliAddrLen = sizeof(cliAddr);
 
-
   while (true) {
     int readStatus = recvfrom(serSockDes, buffer, sizeof(buffer), 0, (struct sockaddr*)&cliAddr, &cliAddrLen);
-
 
     if (buffer[0] == 'R' && buffer[1] == 'X' && readStatus > 0) { // receive data from sondeudp
       debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
 
       string s = buffer;
 
-      vector<string> tokens = splitString(s);
+      if (s.length() > 20) {
+        vector<string> tokens = splitString(s);
 
-      string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
-   
-      for (long unsigned i = 0; i < (vfq.size()); i++) {
-        string vfgFQ = to_string(vfq[i].frequency);
-        if (vfgFQ.substr(0, 5) == tempFQ) {
-          vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
-          if (tokens[1] == "RS41") {
-            vfq[i].bandwidth = bw_RS41;
+        string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
+    
+        for (long unsigned i = 0; i < (vfq.size()); i++) {
+          string vfgFQ = to_string(vfq[i].frequency);
+          if (vfgFQ.substr(0, 5) == tempFQ) {
+
+            vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
+
+            if (tokens[1] == "RS41") {
+              vfq[i].bandwidth = bw_RS41;
+            }
+            if (tokens[1] == "RS92") {
+              vfq[i].bandwidth = bw_RS92;
+            }
+            if (tokens[1] == "DFM") {
+              vfq[i].bandwidth = bw_DFM;
+            }
+            if (tokens[1] == "RS41") {
+              vfq[i].bandwidth = bw_RS41;
+            }
+            if (tokens[1] == "M10") {
+              vfq[i].bandwidth = bw_M10M20;
+            }
+            if (tokens[1] == "M20") {
+              vfq[i].bandwidth = bw_M10M20;
+            }
+            if (tokens[1] == "IMET") {
+              vfq[i].bandwidth = bw_IMET;
+            }
+            if (tokens[1] == "MEIS") {
+              vfq[i].bandwidth = bw_MEISEI;
+            }
           }
-          if (tokens[1] == "RS92") {
-            vfq[i].bandwidth = bw_RS92;
-          }
-          if (tokens[1] == "DFM") {
-            vfq[i].bandwidth = bw_DFM;
-          }
-          if (tokens[1] == "RS41") {
-            vfq[i].bandwidth = bw_RS41;
-          }
-          if (tokens[1] == "M10") {
-            vfq[i].bandwidth = bw_M10M20;
-          }
-          if (tokens[1] == "M20") {
-            vfq[i].bandwidth = bw_M10M20;
-          }
-          if (tokens[1] == "IMET") {
-            vfq[i].bandwidth = bw_IMET;
-          }
-          if (tokens[1] == "MEIS") {
-            vfq[i].bandwidth = bw_MEISEI;
-          }
+          vfgFQ = "";
         }
-      }
-      tempFQ = "";
 
+        tempFQ = "";
+      }
+      
     } else {
       close(serSockDes);
       exit(-1);
@@ -365,7 +374,6 @@ int getpeaks() {
             }
           }
 
-      
           for (i = 0; i < vbl.size(); i++) { 
             int frequency_check = rounded_frequency;
             if (to_string(frequency_check) == to_string(vbl[i])) { //check frequency is on the blacklist
@@ -392,6 +400,20 @@ int getpeaks() {
       }
       debug(to_string(vfq.size()) + " frequencies saved in the list", false);
       string out = "# created with dxlAPRS_scanner\n\n";
+
+      if (config.tuner_settings == 1) { // tuner setting enabled
+        if (config.tuner_gain_correction != 0) {
+        out.append("p 8 " + to_string(config.tuner_gain_correction) + " \t\t# Tuner gain correction\n");
+        }
+        out.append("p 3 " + to_string(config.tuner_auto_gain) + " \t\t# Tuner auto gain\n");
+        if (config.tuner_ppm != 0) {
+          out.append("p 5 " + to_string(config.tuner_ppm) + " \t\t# Tuner ppm\n");
+        }
+        if (config.tuner_gain > 0) {
+          out.append("p 4 " + to_string(config.tuner_gain) + " \t\t# Tuner gain level\n");
+        }
+        out.append("\n");
+      }
 
       for (i = 0; i < vwl.size(); i++) { 
         if ((vwl[i].frequency) > (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
@@ -523,6 +545,47 @@ int main(int argc, char** argv) {
         config.whitelist = argv[i+1];
       } else {
         debug("Error : Whitelist", false);
+        return 0;
+      }
+    } 
+
+    if (strcmp(argv[i],"-tg") == 0) { // Tuner gain
+      if(i+1 < argc) {
+        config.tuner_gain = stoi(argv[i+1]);
+      } else {
+        debug("Error : Tuner gain", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-tga") == 0) { // Tuner auto gain
+      if(i+1 < argc) {
+        config.tuner_auto_gain = stoi(argv[i+1]);
+      } else {
+        debug("Error : Tuner auto gain", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-tgc") == 0) { // Tuner gain correction
+      if(i+1 < argc) {
+        config.tuner_gain_correction = stoi(argv[i+1]);
+      } else {
+        debug("Error : Tuner gain correction", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-tp") == 0) { // Tuner ppm
+      if(i+1 < argc) {
+        config.tuner_ppm = stoi(argv[i+1]);
+      } else {
+        debug("Error : Tuner ppm", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-ts") == 0) { // Tuner settings
+      if(i+1 < argc) {
+        config.tuner_settings = stoi(argv[i+1]);
+      } else {
+        debug("Error : Tuner settings", false);
         return 0;
       }
     } 
