@@ -16,8 +16,9 @@ namespace tools {
         void file_write(const string strFilename, string strData);
         void file_write_append(const string strFilename, string strData);
         int gettimestamp();
-        vector<std::string> splitString(const std::string& str);
+        vector<string> splitString(const string& str);
         int round_double(double value);
+        int countCharacters(const string& text, char targetChar);
 };
 
 #endif
