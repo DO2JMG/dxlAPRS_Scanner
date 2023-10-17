@@ -126,7 +126,7 @@ int receive_sdrtst() {
           db.push_back(buffer[i]); 
         }
       }
-
+    
       // calculateing average
 
       if (config.verbous) debug("DB Count : " + to_string(db.size()) , true);
@@ -222,44 +222,44 @@ int receive_sondeudp() {
 
       if (s.length() > 20) {
         vector<string> tokens = splitString(s);
+        if (tokens.size() >= 2) {
+          string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
+      
+          for (long unsigned i = 0; i < (vfq.size()); i++) {
+            string vfgFQ = to_string(vfq[i].frequency);
+            if (vfgFQ.substr(0, 5) == tempFQ) {
 
-        string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
-    
-        for (long unsigned i = 0; i < (vfq.size()); i++) {
-          string vfgFQ = to_string(vfq[i].frequency);
-          if (vfgFQ.substr(0, 5) == tempFQ) {
+              vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
 
-            vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
-
-            if (tokens[1] == "RS41") {
-              vfq[i].bandwidth = bw_RS41;
+              if (tokens[1] == "RS41") {
+                vfq[i].bandwidth = bw_RS41;
+              }
+              if (tokens[1] == "RS92") {
+                vfq[i].bandwidth = bw_RS92;
+              }
+              if (tokens[1] == "DFM") {
+                vfq[i].bandwidth = bw_DFM;
+              }
+              if (tokens[1] == "RS41") {
+                vfq[i].bandwidth = bw_RS41;
+              }
+              if (tokens[1] == "M10") {
+                vfq[i].bandwidth = bw_M10M20;
+              }
+              if (tokens[1] == "M20") {
+                vfq[i].bandwidth = bw_M10M20;
+              }
+              if (tokens[1] == "IMET") {
+                vfq[i].bandwidth = bw_IMET;
+              }
+              if (tokens[1] == "MEIS") {
+                vfq[i].bandwidth = bw_MEISEI;
+              }
             }
-            if (tokens[1] == "RS92") {
-              vfq[i].bandwidth = bw_RS92;
-            }
-            if (tokens[1] == "DFM") {
-              vfq[i].bandwidth = bw_DFM;
-            }
-            if (tokens[1] == "RS41") {
-              vfq[i].bandwidth = bw_RS41;
-            }
-            if (tokens[1] == "M10") {
-              vfq[i].bandwidth = bw_M10M20;
-            }
-            if (tokens[1] == "M20") {
-              vfq[i].bandwidth = bw_M10M20;
-            }
-            if (tokens[1] == "IMET") {
-              vfq[i].bandwidth = bw_IMET;
-            }
-            if (tokens[1] == "MEIS") {
-              vfq[i].bandwidth = bw_MEISEI;
-            }
+            vfgFQ = "";
           }
-          vfgFQ = "";
+           tempFQ = "";
         }
-
-        tempFQ = "";
       }
       
     } else {

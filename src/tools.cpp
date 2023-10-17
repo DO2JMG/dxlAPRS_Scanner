@@ -50,14 +50,19 @@ namespace tools {
 
   vector<std::string> splitString(const std::string& str) {
       std::vector<std::string> tokens;
-  
-      std::stringstream ss(str);
-      std::string token;
-      while (std::getline(ss, token, ',')) {
-          tokens.push_back(token);
+      try {
+        std::vector<std::string> tokens;
+    
+        std::stringstream ss(str);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            tokens.push_back(token);
+        }
+    
+        return tokens;
+      } catch( std::logic_error ) {
+        return tokens;
       }
-  
-      return tokens;
   }
 
   double round_to(double value, double precision = 1.0) {
