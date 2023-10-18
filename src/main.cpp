@@ -22,7 +22,7 @@
 using namespace std;
 using namespace tools;
 
-#define bw_RS41 6
+#define bw_RS41 8
 #define bw_RS92 12
 #define bw_M10M20 21
 #define bw_IMET 12
@@ -325,6 +325,7 @@ int getpeaks() {
 
           wfl.frequency = stoi(tokens[0]);
           wfl.bandwidth = stoi(tokens[1]);
+          wfl.afc = stoi(tokens[2]);
 
           vwl.push_back(wfl);
           if (config.verbous) debug(line, false);
@@ -428,7 +429,7 @@ int getpeaks() {
         if ((vwl[i].frequency) > (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
           string out_frequency = to_string(vwl[i].frequency);
 
-          out.append("f " + out_frequency.insert(3, ".") + " 5 " + to_string(config.squelch) + " 0 " + to_string(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
+          out.append("f " + out_frequency.insert(3, ".") + " " + to_string(vwl[i].afc) + " " + to_string(config.squelch) + " 0 " + to_string(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
         }
       }
 
