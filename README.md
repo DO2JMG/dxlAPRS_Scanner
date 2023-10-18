@@ -63,12 +63,12 @@ Add frequencies in kilohertz to the list. Frequencies are separated by a new lin
 
 ### Whitelist example :
 
-Add frequencies in kilohertz and bandwidth in khz to the list. Frequencies are separated by a new line.
+Add frequencies in kilohertz,bandwidth khz and afc to the list. Frequencies are separated by a new line.
 
 ```
-  405700,6
-  402300,6
-  401100,6
+  405700,6,5
+  403000,18,8
+  401100,6,5
 ```
 
 ### Allowed options:
