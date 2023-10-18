@@ -19,6 +19,7 @@ namespace tools {
         vector<string> splitString(const string& str);
         int round_double(double value);
         int countCharacters(const string& text, char targetChar);
+        string gettime();
 };
 
 #endif
