@@ -126,7 +126,7 @@ int receive_sdrtst() {
           db.push_back(buffer[i]); 
         }
       }
-    
+
       // calculateing average
 
       if (config.verbous) debug("DB Count : " + to_string(db.size()) , true);
@@ -409,7 +409,9 @@ int getpeaks() {
         if (config.verbous) debug("go ahead on index " + to_string(i), false);
       }
       debug(to_string(vfq.size()) + " frequencies saved in the list", false);
-      string out = "# created with dxlAPRS_scanner\n\n";
+      string out = "# created with dxlAPRS_scanner at ";
+      out.append(gettime());
+      out.append("\n\n");
 
       if (config.tuner_settings == 1) { // tuner setting enabled
         if (config.tuner_gain_correction != 0) {
