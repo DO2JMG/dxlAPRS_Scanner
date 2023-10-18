@@ -26,7 +26,7 @@ using namespace tools;
 #define bw_RS92 12
 #define bw_M10M20 21
 #define bw_IMET 12
-#define bw_DFM 12
+#define bw_DFM 6
 #define bw_MEISEI 15
 
 struct scanner_config {
