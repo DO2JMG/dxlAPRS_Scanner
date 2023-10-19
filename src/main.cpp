@@ -428,7 +428,7 @@ int getpeaks() {
       }
 
       for (i = 0; i < vwl.size(); i++) { 
-        if ((vwl[i].frequency) > (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
+        if ((vwl[i].frequency) >= (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
           string out_frequency = to_string(vwl[i].frequency);
 
           out.append("f " + out_frequency.insert(3, ".") + " " + to_string(vwl[i].afc) + " " + to_string(config.squelch) + " 0 " + to_string(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
