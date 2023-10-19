@@ -323,14 +323,13 @@ int getpeaks() {
           if (line.back() == '\n' || line.back() == ' ') {
             line.pop_back();
           }
-
-          if (isNumeric(line)) {
-            vbl.push_back(stoi(line));
-          }
-          if (config.verbous) debug(line, false);
+          vbl.push_back(stoi(line));
+          if (config.verbous) debug("Add to blacklist " + line, false);
         }
       }
+      blf.close();
     }
+    
 
     // Load whitelist
 
@@ -345,7 +344,7 @@ int getpeaks() {
 
         int cc = countCharacters(line, ',');
 
-        if (line.length() >= 11 && cc > 1) {
+        if (line.length() >= 10 && cc > 1) {
           frequency_list wfl;
 
           vector<string> tokens = splitString(line);
@@ -361,10 +360,12 @@ int getpeaks() {
 
             vwl.push_back(wfl);
           }
-          if (config.verbous) debug(line, false);
+          //if (config.verbous) debug(line, false);
         }
       }
+      wlf.close();
     }
+    
 
     //--------------------------
 
@@ -407,26 +408,23 @@ int getpeaks() {
           bool ison = false;  
  
           for (i = 0; i < vfq.size(); i++) { 
-            if ((rounded_frequency) == vfq[i].frequency) { //check frequency is on the list
+            if (compareNumbers((int)rounded_frequency, vfq[i].frequency, 10) == true) {
               vfq[i].timestamp = gettimestamp();
-              ison = true;
-            }
-            if ((rounded_frequency) == (vfq[i].frequency-10) || (rounded_frequency) == (vfq[i].frequency+10)) {
               ison = true;
             }
           }
 
           for (i = 0; i < vbl.size(); i++) { 
-            int frequency_check = rounded_frequency;
-            if (to_string(frequency_check) == to_string(vbl[i])) { //check frequency is on the blacklist
+            if (compareNumbers((int)rounded_frequency, vbl[i], 10)) {
               ison = true;
+              break;
             }
           }
 
           for (i = 0; i < vwl.size(); i++) { 
-            int frequency_check = rounded_frequency;
-            if (to_string(frequency_check) == to_string(vwl[i].frequency)) { //check frequency is on the whitelist
+            if (compareNumbers((int)rounded_frequency, vwl[i].frequency, 10)) {
               ison = true;
+              break;
             }
           }
 

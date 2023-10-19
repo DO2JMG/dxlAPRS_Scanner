@@ -103,4 +103,18 @@ namespace tools {
     }
     return true; // All characters are digits
   }
+
+  bool compareNumbers(int num1, int num2, int difference) {
+    if (num1 < num2) {
+      int diff = num2 - num1;
+      if (diff <= difference) { return true; } 
+    } else if (num1 > num2) {
+      int diff = num1 - num2;
+      if (diff <= difference) { return true; } 
+    } else if (num1 == num2) {
+      return true;
+    }
+    return false;
+    
+  }
 }
