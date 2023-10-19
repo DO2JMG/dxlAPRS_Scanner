@@ -20,6 +20,7 @@ namespace tools {
         int round_double(double value);
         int countCharacters(const string& text, char targetChar);
         string gettime();
+        bool isNumeric(const string& str);
 };
 
 #endif
