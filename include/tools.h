@@ -21,6 +21,7 @@ namespace tools {
         int countCharacters(const string& text, char targetChar);
         string gettime();
         bool isNumeric(const string& str);
+        bool compareNumbers(int num1, int num2, int difference);
 };
 
 #endif
