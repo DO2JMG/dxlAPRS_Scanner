@@ -69,6 +69,20 @@ vector<frequency_list> vfq;
 vector<int> vbl;
 vector<frequency_list> vwl;
 
+vector<int> vsl;
+vector<int> vpl;
+
+vector<int> findSpikes(const vector<int>& data, int threshold) {
+    vector<int> spikeIndices;
+
+    for (int i = 1; i < data.size() - 1; ++i) {
+        if (data[i] > threshold && data[i] > data[i - 1] && data[i] > data[i + 1]) {
+            spikeIndices.push_back(i);
+        }
+    }
+    return spikeIndices;
+}
+
 bool frequencyisonlist(double fq) {
   if (peaks.size() > 0) {
     for (long unsigned i = 0; i < (peaks.size()); i++) {
@@ -164,11 +178,20 @@ int receive_sdrtst() {
       if (config.verbous) debug("db min : " + to_string(avg_min), false);
       if (config.verbous) debug("db max : " + to_string(avg_max), false);
 
+
+      vsl = findSpikes(db, (avg_max - (avg_all/2)));
+
+      for (long unsigned i = 0; i < (vsl.size()); i++) {
+        int ifq = (vsl[i])*config.steps + (config.startfrequency + 1500);
+        db[vsl[i]] == avg_min;
+      }
+
       // detecting peaks
       debug("Detecting peaks", false);
 
       for (long unsigned i = 0; i < (db.size()); i++) { // add peaks to the list
         if (db[i] > (avg_all + ((avg_all - avg_min)) - config.level)) {
+
           int ifq = (i)*config.steps + (config.startfrequency + 1500);
          
           ifq = ifq/1000.0;  // hz in khz
@@ -179,6 +202,8 @@ int receive_sdrtst() {
           }
         }
       } 
+
+  
     
     } else {
       close(serSockDes);
@@ -219,7 +244,7 @@ int receive_sondeudp() {
       debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
 
       string s = buffer;
-      cout << s << "\n";
+      //cout << s << "\n";
 
       int cc = countCharacters(s, ',');
   
@@ -227,17 +252,12 @@ int receive_sondeudp() {
 
         vector<string> tokens = splitString(s);
 
-        cout << tokens[0] << "\n";
-        cout << tokens[1] << "\n";
-        cout << tokens[2] << "\n";
-
         if (tokens.size() >= 2) {
           string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
       
           for (long unsigned i = 0; i < (vfq.size()); i++) {
             string vfgFQ = to_string(vfq[i].frequency);
             if (vfgFQ.substr(0, 5) == tempFQ) {
-
               vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
 
               if (tokens[1] == "RS41") {
@@ -301,7 +321,7 @@ int getpeaks() {
       while(getline(blf, line)) {
         if (line.length() > 1) {
           vbl.push_back(stoi(line));
-          if (config.verbous) debug(line, false);
+          //if (config.verbous) debug(line, false);
         }
       }
     }
@@ -328,7 +348,7 @@ int getpeaks() {
           wfl.afc = stoi(tokens[2]);
 
           vwl.push_back(wfl);
-          if (config.verbous) debug(line, false);
+          //if (config.verbous) debug(line, false);
         }
       }
     }
