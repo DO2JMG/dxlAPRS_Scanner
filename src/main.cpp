@@ -70,7 +70,6 @@ vector<int> vbl;
 vector<frequency_list> vwl;
 
 vector<int> vsl;
-vector<int> vpl;
 
 vector<int> findSpikes(const vector<int>& data, int threshold) {
     vector<int> spikeIndices;
@@ -202,9 +201,6 @@ int receive_sdrtst() {
           }
         }
       } 
-
-  
-    
     } else {
       close(serSockDes);
       exit(-1);
@@ -244,8 +240,7 @@ int receive_sondeudp() {
       debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
 
       string s = buffer;
-      //cout << s << "\n";
-
+      
       int cc = countCharacters(s, ',');
   
       if (s.length() > 20 && cc > 1) {
@@ -258,7 +253,11 @@ int receive_sondeudp() {
           for (long unsigned i = 0; i < (vfq.size()); i++) {
             string vfgFQ = to_string(vfq[i].frequency);
             if (vfgFQ.substr(0, 5) == tempFQ) {
+
               vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
+              if (vfq[i].serial.back() == '\n') {
+                vfq[i].serial.pop_back();
+              }
 
               if (tokens[1] == "RS41") {
                 vfq[i].bandwidth = bw_RS41;
@@ -285,6 +284,7 @@ int receive_sondeudp() {
                 vfq[i].bandwidth = bw_MEISEI;
               }
             }
+            tokens.clear();
             vfgFQ = "";
           }
            tempFQ = "";
@@ -320,13 +320,17 @@ int getpeaks() {
       string line;
       while(getline(blf, line)) {
         if (line.length() > 1) {
-          vbl.push_back(stoi(line));
-          //if (config.verbous) debug(line, false);
+          if (line.back() == '\n' || line.back() == ' ') {
+            line.pop_back();
+          }
+
+          if (isNumeric(line)) {
+            vbl.push_back(stoi(line));
+          }
+          if (config.verbous) debug(line, false);
         }
       }
     }
-
-    //--------------------------
 
     // Load whitelist
 
@@ -338,17 +342,26 @@ int getpeaks() {
     if (wlf.is_open()) { 
       string line;
       while(getline(wlf, line)) {
-        if (line.length() > 3) {
+
+        int cc = countCharacters(line, ',');
+
+        if (line.length() >= 11 && cc > 1) {
           frequency_list wfl;
 
           vector<string> tokens = splitString(line);
 
-          wfl.frequency = stoi(tokens[0]);
-          wfl.bandwidth = stoi(tokens[1]);
-          wfl.afc = stoi(tokens[2]);
+          if (line.back() == '\n' || line.back() == ' ') {
+            line.pop_back();
+          }
 
-          vwl.push_back(wfl);
-          //if (config.verbous) debug(line, false);
+          if (isNumeric(tokens[0]) && isNumeric(tokens[1]) && isNumeric(tokens[2])) {
+            wfl.frequency = stoi(tokens[0]);
+            wfl.bandwidth = stoi(tokens[1]);
+            wfl.afc = stoi(tokens[2]);
+
+            vwl.push_back(wfl);
+          }
+          if (config.verbous) debug(line, false);
         }
       }
     }
@@ -390,7 +403,6 @@ int getpeaks() {
 
           double rounded_frequency = round_double(((fql + fq)/1000) * 100.0) / 100.0; 
           rounded_frequency = rounded_frequency *1000;
-
 
           bool ison = false;  
  

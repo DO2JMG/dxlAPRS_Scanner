@@ -94,4 +94,13 @@ namespace tools {
     }
     return count;
   }
+
+  bool isNumeric(const string& str) {
+    for (char c : str) {
+        if (!isdigit(c)) {
+            return false; // Found a non-digit character
+        }
+    }
+    return true; // All characters are digits
+  }
 }
