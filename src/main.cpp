@@ -40,6 +40,7 @@ struct scanner_config {
   int minbw = 5;
   int maxbw = 22;
   int squelch = 65; 
+  int lowpass = 0;
   int timer_peaks = 30; // refresh frequency list after 60 seconds
   int timer_holding = 180; // frequencies clear after 120 seconds
   int timer_serial = 60;
@@ -49,6 +50,8 @@ struct scanner_config {
   int tuner_auto_gain = 0;
   int tuner_gain_correction = 1;
   int tuner_ppm = 0;
+  int max_frequency_fql = 10;
+  int max_frequency_fpl = 200;
   string filename;
   string blacklist;
   string whitelist;
@@ -116,8 +119,8 @@ int receive_sdrtst() {
 
   cliAddrLen = sizeof(cliAddr);
 
-  if (config.verbous) debug("Start frequency " + to_string(config.startfrequency) + "hz", false);
-  if (config.verbous) debug("Steps : " + to_string(config.steps) + "hz", true);
+  if (config.verbous) debug("Start frequency " + converttostring(config.startfrequency) + "hz", false);
+  if (config.verbous) debug("Steps : " + converttostring(config.steps) + "hz", true);
 
 
   while (true) {
@@ -125,7 +128,7 @@ int receive_sdrtst() {
 
 
     if (buffer[0] == 'S' && buffer[1] == 'D' && buffer[2] == 'R' && buffer[3] == 'L' && readStatus > 0) { // receive data from sdrtst
-      debug("------------- Receiving data from port " + to_string(config.sdrtst_port), false);
+      debug("------------- Receiving data from port " + converttostring(config.sdrtst_port), false);
 
       int dlen = sizeof(buffer);
 
@@ -142,7 +145,7 @@ int receive_sdrtst() {
 
       // calculateing average
 
-      if (config.verbous) debug("DB Count : " + to_string(db.size()) , true);
+      if (config.verbous) debug("DB Count : " + converttostring(db.size()) , true);
 
       if (config.verbous) debug("Calculateing average", false);
 
@@ -153,54 +156,58 @@ int receive_sdrtst() {
       int dbc = 0;
       int dbs = 0;
 
-      for (auto i = db.begin(); i != db.end(); ++i) {
-        if (*i < avg_min) { avg_min = *i; }
-        if (*i > avg_max) { avg_max = *i; }
+      if (db.size() > 0) {
+        for (auto i = db.begin(); i != db.end(); ++i) {
+          if (*i < avg_min) { avg_min = *i; }
+          if (*i > avg_max) { avg_max = *i; }
 
-        if (dbc <= config.cmn) {
-          dbs += *i;
-          dbc++;
-        } else {
-          db_avg.push_back(dbs / config.cmn);
-          if (config.verbous) debug("db noise block : " + to_string(dbs / config.cmn), false);
+          if (dbc <= config.cmn) {
+            dbs += *i;
+            dbc++;
+          } else {
+            db_avg.push_back(dbs / config.cmn);
+            if (config.verbous) debug("db noise block : " + converttostring(dbs / config.cmn), false);
 
-          dbs = 0;
-          dbc = 0;
-        }
-      }
-
-      for (auto i = db_avg.begin(); i != db_avg.end(); ++i) { avg_all += *i; }
-
-      avg_all = (avg_all / db_avg.size());
-
-      if (config.verbous) debug("db avg : " + to_string(avg_all), false);
-      if (config.verbous) debug("db min : " + to_string(avg_min), false);
-      if (config.verbous) debug("db max : " + to_string(avg_max), false);
-
-
-      vsl = findSpikes(db, (avg_max - (avg_all/2)));
-
-      for (long unsigned i = 0; i < (vsl.size()); i++) {
-        int ifq = (vsl[i])*config.steps + (config.startfrequency + 1500);
-        db[vsl[i]] == avg_min;
-      }
-
-      // detecting peaks
-      debug("Detecting peaks", false);
-
-      for (long unsigned i = 0; i < (db.size()); i++) { // add peaks to the list
-        if (db[i] > (avg_all + ((avg_all - avg_min)) - config.level)) {
-
-          int ifq = (i)*config.steps + (config.startfrequency + 1500);
-         
-          ifq = ifq/1000.0;  // hz in khz
-        
-          if (frequencyisonlist(ifq) == false) { // frequency is not on the list
-            peaks.push_back(ifq);
-            if (config.verbous) debug("detected peak at " + to_string(ifq) + "hz db = " + to_string(db[i]), false);
+            dbs = 0;
+            dbc = 0;
           }
         }
-      } 
+        
+        for (auto i = db_avg.begin(); i != db_avg.end(); ++i) { avg_all += *i; }
+
+        avg_all = (avg_all / db_avg.size());
+
+        if (config.verbous) debug("db avg : " + converttostring(avg_all), false);
+        if (config.verbous) debug("db min : " + converttostring(avg_min), false);
+        if (config.verbous) debug("db max : " + converttostring(avg_max), false);
+      
+
+        vsl = findSpikes(db, (avg_max - (avg_all/2)));
+
+        for (long unsigned i = 0; i < (vsl.size()); i++) {
+          int ifq = (vsl[i])*config.steps + (config.startfrequency + 3000);
+          db[vsl[i]] == avg_min;
+        }
+
+        // detecting peaks
+        debug("Detecting peaks", false);
+
+
+        for (long unsigned i = 0; i < (db.size()); i++) { // add peaks to the list
+          if (db[i] > (avg_all + ((avg_all - avg_min)) - config.level)) {
+
+            int ifq = (i)*config.steps + (config.startfrequency + 1500);
+          
+            ifq = ifq/1000.0;  // hz in khz
+          
+            if (frequencyisonlist(ifq) == false && peaks.size() < config.max_frequency_fpl) { // frequency is not on the list
+              peaks.push_back(ifq);
+              if (config.verbous) debug("detected peak at " + converttostring(ifq) + "hz db = " + converttostring(db[i]), false);
+            }
+          }
+        } 
+      }
+
     } else {
       close(serSockDes);
       exit(-1);
@@ -237,7 +244,7 @@ int receive_sondeudp() {
     int readStatus = recvfrom(serSockDes, buffer, sizeof(buffer), 0, (struct sockaddr*)&cliAddr, &cliAddrLen);
 
     if (buffer[0] == 'R' && buffer[1] == 'X' && readStatus > 0) { // receive data from sondeudp
-      debug("------------- Receiving data from port " + to_string(config.sondeudp_port), false);
+      debug("------------- Receiving data from port " + converttostring(config.sondeudp_port), false);
 
       string s = buffer;
       
@@ -248,40 +255,46 @@ int receive_sondeudp() {
         vector<string> tokens = splitString(s);
 
         if (tokens.size() >= 2) {
-          string tempFQ = tokens[0].substr(2, tokens[0].length() -5);
+          string tempFQ;
+          if (tokens[0].length() > 5) {
+            tempFQ = tokens[0].substr(2, tokens[0].length() -5);
+          }
       
           for (long unsigned i = 0; i < (vfq.size()); i++) {
-            string vfgFQ = to_string(vfq[i].frequency);
-            if (vfgFQ.substr(0, 5) == tempFQ) {
+            string vfgFQ = converttostring(vfq[i].frequency);
 
-              vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
-              if (vfq[i].serial.back() == '\n') {
-                vfq[i].serial.pop_back();
-              }
+            if (vfgFQ.length() > 5) {
+              if (vfgFQ.substr(0, 5) == tempFQ && tempFQ.length() > 5) {
 
-              if (tokens[1] == "RS41") {
-                vfq[i].bandwidth = bw_RS41;
-              }
-              if (tokens[1] == "RS92") {
-                vfq[i].bandwidth = bw_RS92;
-              }
-              if (tokens[1] == "DFM") {
-                vfq[i].bandwidth = bw_DFM;
-              }
-              if (tokens[1] == "RS41") {
-                vfq[i].bandwidth = bw_RS41;
-              }
-              if (tokens[1] == "M10") {
-                vfq[i].bandwidth = bw_M10M20;
-              }
-              if (tokens[1] == "M20") {
-                vfq[i].bandwidth = bw_M10M20;
-              }
-              if (tokens[1] == "IMET") {
-                vfq[i].bandwidth = bw_IMET;
-              }
-              if (tokens[1] == "MEIS") {
-                vfq[i].bandwidth = bw_MEISEI;
+                vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
+                if (vfq[i].serial.back() == '\n') {
+                  vfq[i].serial.pop_back();
+                }
+
+                if (tokens[1] == "RS41") {
+                  vfq[i].bandwidth = bw_RS41;
+                }
+                if (tokens[1] == "RS92") {
+                  vfq[i].bandwidth = bw_RS92;
+                }
+                if (tokens[1] == "DFM") {
+                  vfq[i].bandwidth = bw_DFM;
+                }
+                if (tokens[1] == "RS41") {
+                  vfq[i].bandwidth = bw_RS41;
+                }
+                if (tokens[1] == "M10") {
+                  vfq[i].bandwidth = bw_M10M20;
+                }
+                if (tokens[1] == "M20") {
+                  vfq[i].bandwidth = bw_M10M20;
+                }
+                if (tokens[1] == "IMET") {
+                  vfq[i].bandwidth = bw_IMET;
+                }
+                if (tokens[1] == "MEIS") {
+                  vfq[i].bandwidth = bw_MEISEI;
+                }
               }
             }
             tokens.clear();
@@ -323,7 +336,7 @@ int getpeaks() {
           if (line.back() == '\n' || line.back() == ' ') {
             line.pop_back();
           }
-          vbl.push_back(stoi(line));
+          vbl.push_back(converttoint(line));
           if (config.verbous) debug("Add to blacklist " + line, false);
         }
       }
@@ -353,10 +366,10 @@ int getpeaks() {
             line.pop_back();
           }
 
-          if (isNumeric(tokens[0]) && isNumeric(tokens[1]) && isNumeric(tokens[2])) {
-            wfl.frequency = stoi(tokens[0]);
-            wfl.bandwidth = stoi(tokens[1]);
-            wfl.afc = stoi(tokens[2]);
+          if (isNumeric(tokens[0]) && isNumeric(tokens[1]) && isNumeric(tokens[2]) && tokens.size() > 2) {
+            wfl.frequency = converttoint(tokens[0]);
+            wfl.bandwidth = converttoint(tokens[1]);
+            wfl.afc = converttoint(tokens[2]);
 
             vwl.push_back(wfl);
           }
@@ -382,15 +395,15 @@ int getpeaks() {
       pib = 0;   
        while ((i < fqc) && (vfq.size() < 400)) {
         fql = peaks[pib];
-        if (config.verbous) debug("smallest frequency " + to_string((int)fql), false);
+        if (config.verbous) debug("smallest frequency " + converttostring((int)fql), false);
 
         while((pib < fqc-1) && ((peaks[pib+1] - peaks[pib]) < 5.0)) { pib++; }
 
-        if (config.verbous) debug("greatest frequency "+to_string(peaks[pib])+", at index "+to_string(pib),false);
+        if (config.verbous) debug("greatest frequency "+converttostring(peaks[pib])+", at index "+converttostring(pib),false);
 
         if ((pib - i) >= config.cmp)  // 
         {
-          if (config.verbous) debug("strong signals detected with more or equal " + to_string(config.cmp + 1) + " nearby frequency",false);
+          if (config.verbous) debug("strong signals detected with more or equal " + converttostring(config.cmp + 1) + " nearby frequency",false);
 
           frequency_list nfq;
           fqh = peaks[pib];
@@ -406,29 +419,35 @@ int getpeaks() {
           rounded_frequency = rounded_frequency *1000;
 
           bool ison = false;  
- 
-          for (i = 0; i < vfq.size(); i++) { 
-            if (compareNumbers((int)rounded_frequency, vfq[i].frequency, 10) == true) {
-              vfq[i].timestamp = gettimestamp();
-              ison = true;
+
+          if (vfq.size() > 0) {
+            for (i = 0; i < vfq.size(); i++) { 
+              if (compareNumbers((int)rounded_frequency, vfq[i].frequency, 10) == true) {
+                vfq[i].timestamp = gettimestamp();
+                ison = true;
+              }
             }
           }
 
-          for (i = 0; i < vbl.size(); i++) { 
-            if (compareNumbers((int)rounded_frequency, vbl[i], 10)) {
-              ison = true;
-              break;
+          if (vbl.size() > 0) {
+            for (i = 0; i < vbl.size(); i++) { 
+              if (compareNumbers((int)rounded_frequency, vbl[i], 10)) {
+                ison = true;
+                break;
+              }
             }
           }
 
-          for (i = 0; i < vwl.size(); i++) { 
-            if (compareNumbers((int)rounded_frequency, vwl[i].frequency, 10)) {
-              ison = true;
-              break;
+          if (vwl.size() > 0) {
+            for (i = 0; i < vwl.size(); i++) { 
+              if (compareNumbers((int)rounded_frequency, vwl[i].frequency, 10)) {
+                ison = true;
+                break;
+              }
             }
           }
 
-          if (ison == false && nfq.bandwidth > config.minbw) {
+          if (ison == false && nfq.bandwidth > config.minbw && vfq.size() < config.max_frequency_fql) {
             nfq.frequency = (rounded_frequency); // add frequency to the list
             nfq.timestamp = gettimestamp();
             vfq.push_back(nfq);
@@ -436,56 +455,67 @@ int getpeaks() {
         }
         pib++;
         i = pib;
-        if (config.verbous) debug("go ahead on index " + to_string(i), false);
+        if (config.verbous) debug("go ahead on index " + converttostring(i), false);
       }
-      debug(to_string(vfq.size()) + " frequencies saved in the list", false);
+      debug(converttostring(vfq.size()) + " frequencies saved in the list", false);
+
       string out = "# created with dxlAPRS_scanner at ";
       out.append(gettime());
       out.append("\n\n");
 
       if (config.tuner_settings == 1) { // tuner setting enabled
         if (config.tuner_gain_correction != 0) {
-        out.append("p 8 " + to_string(config.tuner_gain_correction) + " \t\t# Tuner gain correction\n");
+        out.append("p 8 " + converttostring(config.tuner_gain_correction) + " \t\t# Tuner gain correction\n");
         }
-        out.append("p 3 " + to_string(config.tuner_auto_gain) + " \t\t# Tuner auto gain\n");
+        out.append("p 3 " + converttostring(config.tuner_auto_gain) + " \t\t# Tuner auto gain\n");
         if (config.tuner_ppm != 0) {
-          out.append("p 5 " + to_string(config.tuner_ppm) + " \t\t# Tuner ppm\n");
+          out.append("p 5 " + converttostring(config.tuner_ppm) + " \t\t# Tuner ppm\n");
         }
         if (config.tuner_gain > 0) {
-          out.append("p 4 " + to_string(config.tuner_gain) + " \t\t# Tuner gain level\n");
+          out.append("p 4 " + converttostring(config.tuner_gain) + " \t\t# Tuner gain level\n");
         }
         out.append("\n");
       }
 
-      for (i = 0; i < vwl.size(); i++) { 
-        if ((vwl[i].frequency) >= (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
-          string out_frequency = to_string(vwl[i].frequency);
+      int wlc = 0;
 
-          out.append("f " + out_frequency.insert(3, ".") + " " + to_string(vwl[i].afc) + " " + to_string(config.squelch) + " 0 " + to_string(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
-        }
-      }
+      if (vwl.size() > 0) {
+        for (i = 0; i < vwl.size(); i++) { 
+          if ((vwl[i].frequency) >= (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
+            string out_frequency = converttostring(vwl[i].frequency);
 
-      for (auto& vfge : vfq) { // creating the frequencieslist for dxlAPRS
-        debug(to_string(vfge.frequency) + " " + to_string(vfge.bandwidth) + " " + to_string(vfge.timestamp), false);
-        string out_frequency = to_string(vfge.frequency);
-
-        out.append("f " + out_frequency.insert(3, ".") + " " + to_string(vfge.afc) + " " + to_string(config.squelch) + " 0 " + to_string(vfge.bandwidth * 1000) + " \t# " + vfge.serial + "\n");
-      }
-      for (i = 0; i < vfq.size(); i++) { 
-        if ( (gettimestamp() - vfq[i].timestamp) > config.timer_holding) { //check timestamp and remove from list
-          vfq.erase(vfq.begin() + i);
-        }
-        if ( (gettimestamp() - vfq[i].timestamp) > config.timer_serial) { //check serial and remove from list
-          if (vfq[i].serial.length() < 8) {
-            vfq.erase(vfq.begin() + i);
+            out.append("f " + out_frequency.insert(3, ".") + " " + converttostring(vwl[i].afc) + " " + converttostring(config.squelch) + " " + converttostring(config.lowpass) + " " + converttostring(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
+            wlc++;
           }
         }
       }
+      
+      if (vfq.size() > 0 && vfq.size() < (config.max_frequency_fql - wlc++) ) {
+        for (auto& vfge : vfq) { // creating the frequencieslist for dxlAPRS
+          debug(converttostring(vfge.frequency) + " " + converttostring(vfge.bandwidth) + " " + converttostring(vfge.timestamp), false);
+          string out_frequency = converttostring(vfge.frequency);
 
-      string out_startfrequency = to_string(config.startfrequency/1000);
-      string out_stopfrequency = to_string((config.startfrequency/1000)+2000);
+          out.append("f " + out_frequency.insert(3, ".") + " " + converttostring(vfge.afc) + " " + converttostring(config.squelch) + " " + converttostring(config.lowpass) + " " + converttostring(vfge.bandwidth * 1000) + " \t# " + vfge.serial + "\n");
+        }
 
-      out.append("s " + out_startfrequency.insert(3, ".") + " " + out_stopfrequency.insert(3, ".") + " " + to_string(config.steps) + " 6 3000\n");
+        for (i = 0; i < vfq.size(); i++) { 
+          if ( (gettimestamp() - vfq[i].timestamp) > config.timer_holding) { //check timestamp and remove from list
+            vfq.erase(vfq.begin() + i);
+          }
+          if ( (gettimestamp() - vfq[i].timestamp) > config.timer_serial) { //check serial and remove from list
+            if (vfq[i].serial.length() < 8) {
+              vfq.erase(vfq.begin() + i);
+            }
+          }
+        }
+      } else {
+        debug("Too many frequencies in the list.", false);
+      }
+
+      string out_startfrequency = converttostring(config.startfrequency/1000);
+      string out_stopfrequency = converttostring((config.startfrequency/1000)+2000);
+
+      out.append("s " + out_startfrequency.insert(3, ".") + " " + out_stopfrequency.insert(3, ".") + " " + converttostring(config.steps) + " 6 3000\n");
 
       file_write(config.filename, out);
 
@@ -511,7 +541,7 @@ int main(int argc, char** argv) {
     }
     if (strcmp(argv[i],"-p") == 0) { // port sdrtst -L <ip>:<port>
       if(i+1 < argc) {
-        config.sdrtst_port = stoi(argv[i+1]);
+        config.sdrtst_port = converttoint(argv[i+1]);
       } else {
         debug("Error : Port", false);
         return 0;
@@ -519,7 +549,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-u") == 0) { // port sondeudp -M <ip>:<port>
       if(i+1 < argc) {
-        config.sondeudp_port = stoi(argv[i+1]);
+        config.sondeudp_port = converttoint(argv[i+1]);
       } else {
         debug("Error : Port", false);
         return 0;
@@ -527,7 +557,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-s") == 0) {
       if(i+1 < argc) {
-        config.steps = stoi(argv[i+1]);
+        config.steps = converttoint(argv[i+1]);
         if (config.steps < 1500) {config.steps = 1500; } // 1500hz is minimum
       } else {
         debug("Error : Steps", false);
@@ -536,7 +566,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-f") == 0) {
       if(i+1 < argc) {
-        config.startfrequency = stoi(argv[i+1]); // start frequency in hz
+        config.startfrequency = converttoint(argv[i+1]); // start frequency in hz
       } else {
         debug("Error : Startfrequency", false);
         return 0;
@@ -552,7 +582,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-t") == 0) { // timer for holding frequencies 
       if(i+1 < argc) {
-        config.timer_holding = stoi(argv[i+1]);
+        config.timer_holding = converttoint(argv[i+1]);
       } else {
         debug("Error : Holding timer", false);
         return 0;
@@ -568,7 +598,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-q") == 0) { // squelch for channel file
       if(i+1 < argc) {
-        config.squelch = stoi(argv[i+1]);
+        config.squelch = converttoint(argv[i+1]);
       } else {
         debug("Error : Squelch", false);
         return 0;
@@ -576,7 +606,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-n") == 0) { // Level
       if(i+1 < argc) {
-        config.level = stoi(argv[i+1]);
+        config.level = converttoint(argv[i+1]);
       } else {
         debug("Error : Level", false);
         return 0;
@@ -593,7 +623,7 @@ int main(int argc, char** argv) {
 
     if (strcmp(argv[i],"-tg") == 0) { // Tuner gain
       if(i+1 < argc) {
-        config.tuner_gain = stoi(argv[i+1]);
+        config.tuner_gain = converttoint(argv[i+1]);
       } else {
         debug("Error : Tuner gain", false);
         return 0;
@@ -601,7 +631,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-tga") == 0) { // Tuner auto gain
       if(i+1 < argc) {
-        config.tuner_auto_gain = stoi(argv[i+1]);
+        config.tuner_auto_gain = converttoint(argv[i+1]);
       } else {
         debug("Error : Tuner auto gain", false);
         return 0;
@@ -609,7 +639,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-tgc") == 0) { // Tuner gain correction
       if(i+1 < argc) {
-        config.tuner_gain_correction = stoi(argv[i+1]);
+        config.tuner_gain_correction = converttoint(argv[i+1]);
       } else {
         debug("Error : Tuner gain correction", false);
         return 0;
@@ -617,7 +647,7 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-tp") == 0) { // Tuner ppm
       if(i+1 < argc) {
-        config.tuner_ppm = stoi(argv[i+1]);
+        config.tuner_ppm = converttoint(argv[i+1]);
       } else {
         debug("Error : Tuner ppm", false);
         return 0;
@@ -625,9 +655,17 @@ int main(int argc, char** argv) {
     } 
     if (strcmp(argv[i],"-ts") == 0) { // Tuner settings
       if(i+1 < argc) {
-        config.tuner_settings = stoi(argv[i+1]);
+        config.tuner_settings = converttoint(argv[i+1]);
       } else {
         debug("Error : Tuner settings", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-l") == 0) { // Lowpass settings
+      if(i+1 < argc) {
+        config.lowpass = converttoint(argv[i+1]);
+      } else {
+        debug("Error : Lowpass settings", false);
         return 0;
       }
     } 

@@ -11,6 +11,8 @@
 #include <fstream>
 #include <ctime>
 #include <math.h>
+#include <stdexcept>
+
 #include "tools.h"
 
 using namespace std;
@@ -59,24 +61,31 @@ namespace tools {
   }
 
   vector<string> splitString(const string& str) {
-      std::vector<std::string> tokens;
-      try {
-        std::vector<std::string> tokens;
+    vector<string> tokens;
+    try {
+      vector<string> tokens;
     
-        std::stringstream ss(str);
-        std::string token;
-        while (std::getline(ss, token, ',')) {
-            tokens.push_back(token);
-        }
-    
-        return tokens;
-      } catch( std::logic_error ) {
-        return tokens;
+      stringstream ss(str);
+      string token;
+      while (getline(ss, token, ',')) {
+        tokens.push_back(token);
       }
+    
+      return tokens;
+    } catch (const exception& e) {
+      cerr << "Error: " << e.what() << endl;
+    }
+    return tokens;
   }
 
   double round_to(double value, double precision = 1.0) {
-    return round(value / precision) * precision;
+    try {
+      return round(value / precision) * precision;
+    } catch (const exception& e) {
+      cerr << "Error: " << e.what() << endl;
+      return 0;
+    }
+    return 0;
   }
 
   int round_double(double value) {
@@ -117,4 +126,31 @@ namespace tools {
     return false;
     
   }
+
+  int converttoint(string data) {
+    try {
+      int number = stoi(data);
+      return number;
+    } catch (const invalid_argument& e) {
+      cerr << "Error: Invalid " << e.what() << endl;
+      return 0;
+    } catch (const out_of_range& e) {
+      cerr << "Error: Out of range. " << e.what() << endl;
+    }
+    return 0;
+  }
+  
+  string converttostring(int data) {
+    try {
+      string number = to_string(data);
+      return number;
+    } catch (const invalid_argument& e) {
+      cerr << "Error: Invalid " << e.what() << endl;
+      return "";
+    } catch (const out_of_range& e) {
+      cerr << "Error: Out of range. " << e.what() << endl;
+    }
+    return "";
+  }
 }
+
