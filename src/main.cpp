@@ -57,14 +57,6 @@ struct scanner_config {
   string whitelist;
 };
 
-struct frequency_list {
-  int frequency;
-  int bandwidth;
-  int timestamp;
-  int afc = 5;
-  string serial;
-};
-
 scanner_config config;
 
 vector<int> peaks;
@@ -256,15 +248,15 @@ int receive_sondeudp() {
 
         if (tokens.size() >= 2) {
           string tempFQ;
-          if (tokens[0].length() > 5) {
+          if (tokens[0].length() > 4) {
             tempFQ = tokens[0].substr(2, tokens[0].length() -5);
           }
       
           for (long unsigned i = 0; i < (vfq.size()); i++) {
             string vfgFQ = converttostring(vfq[i].frequency);
 
-            if (vfgFQ.length() > 5) {
-              if (vfgFQ.substr(0, 5) == tempFQ && tempFQ.length() > 5) {
+            if (vfgFQ.length() > 4) {
+              if (vfgFQ.substr(0, 5) == tempFQ) {
 
                 vfq[i].serial = tokens[2].substr(0, tokens[2].length() -1);
                 if (vfq[i].serial.back() == '\n') {
@@ -452,6 +444,8 @@ int getpeaks() {
             nfq.timestamp = gettimestamp();
             vfq.push_back(nfq);
           }
+
+          findbigsignal(vfq);
         }
         pib++;
         i = pib;

@@ -18,6 +18,7 @@
 using namespace std;
 
 namespace tools {
+
   void debug(string strData, bool newline) {
     time_t     now = time(0);
     struct tm  tstruct;
@@ -151,6 +152,26 @@ namespace tools {
       cerr << "Error: Out of range. " << e.what() << endl;
     }
     return "";
+  }
+
+  void findbigsignal(vector<frequency_list> vfl) {
+    if (vfl.size() > 0) {
+      for (int i = 0; i < vfl.size(); i++) { 
+        if (i > 0 && (vfl[i].frequency - vfl[i-1].frequency) < 11 && (vfl[i+1].frequency - vfl[i].frequency ) < 11) {
+          vfl[i].bandwidth = vfl[i].bandwidth + 20;
+          vfl.erase(vfl.begin() + (i-1));
+          vfl.erase(vfl.begin() + (i+1));
+        }
+      }
+      for (int i = 0; i < vfl.size(); i++) { 
+        if (i > 0 && (vfl[i].frequency - vfl[i-1].frequency) < 21 && (vfl[i+1].frequency - vfl[i].frequency ) < 21) {
+          vfl[i].bandwidth = vfl[i].bandwidth + 40;
+          vfl.erase(vfl.begin() + (i-1));
+          vfl.erase(vfl.begin() + (i+1));
+        }
+      }
+      
+    }
   }
 }
 
