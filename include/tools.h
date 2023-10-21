@@ -22,6 +22,8 @@ namespace tools {
         string gettime();
         bool isNumeric(const string& str);
         bool compareNumbers(int num1, int num2, int difference);
+        int converttoint(string data);
+        string converttostring(int data);
 };
 
 #endif
