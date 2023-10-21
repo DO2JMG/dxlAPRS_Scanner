@@ -51,7 +51,7 @@ struct scanner_config {
   int tuner_gain_correction = 1;
   int tuner_ppm = 0;
   int max_frequency_fql = 10;
-  int max_frequency_fpl = 200;
+  int max_frequency_fpl = 300;
   string filename;
   string blacklist;
   string whitelist;
