@@ -11,8 +11,16 @@
 
 using namespace std;
 
+struct frequency_list {
+        int frequency;
+        int bandwidth;
+        int timestamp;
+        int afc = 5;
+        string serial;
+};
+
 namespace tools {
-        void debug(std::string strData, bool newline);
+        void debug(string strData, bool newline);
         void file_write(const string strFilename, string strData);
         void file_write_append(const string strFilename, string strData);
         int gettimestamp();
@@ -24,6 +32,7 @@ namespace tools {
         bool compareNumbers(int num1, int num2, int difference);
         int converttoint(string data);
         string converttostring(int data);
+        void findbigsignal(vector<frequency_list> vfl);
 };
 
 #endif
