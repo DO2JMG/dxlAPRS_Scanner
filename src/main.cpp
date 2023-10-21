@@ -509,7 +509,7 @@ int getpeaks() {
           }
         }
       } else {
-        debug("Too many frequencies in the list.", false);
+        debug("Error Frequency list", false);
       }
 
       string out_startfrequency = converttostring(config.startfrequency/1000);
