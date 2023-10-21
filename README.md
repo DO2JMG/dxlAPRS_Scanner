@@ -85,6 +85,7 @@ Argument|Description|Value
 `-b`|Filename blacklist|blacklist.txt
 `-w`|Filename whitelist|whitelist.txt
 `-n`|Level (Default is 5) > 5 higher sensitivity|`5`
+`-l`|audio lowpass|`0`
 `-v`|Verbous mode|
 
 ### Tuner Settings:
