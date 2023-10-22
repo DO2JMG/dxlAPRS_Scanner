@@ -5,6 +5,8 @@ This project contains scanner written in c++ to scan and decode multiple frequen
 
 I would be very happy about ideas and further developments!
 
+You can find scripts to start dxlAPRS and the scanner here. https://github.com/DO2JMG/dxlAPRS_Scripte
+
 ### Unpack and compile :
 
 ```
