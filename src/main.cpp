@@ -51,7 +51,7 @@ struct scanner_config {
   int tuner_gain_correction = 1;
   int tuner_ppm = 0;
   int max_frequency_fql = 10;
-  int max_frequency_fpl = 300;
+  int max_frequency_fpl = 400;
   string filename;
   string blacklist;
   string whitelist;
@@ -374,12 +374,12 @@ int getpeaks() {
 
     //--------------------------
 
-    sort(std::begin(peaks), std::end(peaks)); // sort peaks
-
     int i = 0;
 
     if (peaks.size() > 0) {
       debug("------------- peaks...", false);
+
+      sort(std::begin(peaks), std::end(peaks)); // sort peaks
 
       fqc = peaks.size();
 

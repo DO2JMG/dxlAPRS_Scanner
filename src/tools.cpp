@@ -62,8 +62,7 @@ namespace tools {
   }
 
   vector<string> splitString(const string& str) {
-    vector<string> tokens;
-    try {
+    //try {
       vector<string> tokens;
     
       stringstream ss(str);
@@ -72,21 +71,15 @@ namespace tools {
         tokens.push_back(token);
       }
     
-      return tokens;
-    } catch (const exception& e) {
-      cerr << "Error: " << e.what() << endl;
-    }
+    //  return tokens;
+    //} catch (const exception& e) {
+    //  cerr << "Error: " << e.what() << endl;
+    //}
     return tokens;
   }
 
   double round_to(double value, double precision = 1.0) {
-    try {
-      return round(value / precision) * precision;
-    } catch (const exception& e) {
-      cerr << "Error: " << e.what() << endl;
-      return 0;
-    }
-    return 0;
+    return round(value / precision) * precision;
   }
 
   int round_double(double value) {
@@ -129,29 +122,13 @@ namespace tools {
   }
 
   int converttoint(string data) {
-    try {
-      int number = stoi(data);
-      return number;
-    } catch (const invalid_argument& e) {
-      cerr << "Error: Invalid " << e.what() << endl;
-      return 0;
-    } catch (const out_of_range& e) {
-      cerr << "Error: Out of range. " << e.what() << endl;
-    }
-    return 0;
+    int number = stoi(data);
+    return number;
   }
   
   string converttostring(int data) {
-    try {
-      string number = to_string(data);
-      return number;
-    } catch (const invalid_argument& e) {
-      cerr << "Error: Invalid " << e.what() << endl;
-      return "";
-    } catch (const out_of_range& e) {
-      cerr << "Error: Out of range. " << e.what() << endl;
-    }
-    return "";
+    string number = to_string(data);
+    return number;
   }
 
   void findbigsignal(vector<frequency_list> vfl) {
