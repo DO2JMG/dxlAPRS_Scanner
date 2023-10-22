@@ -137,7 +137,7 @@ int receive_sdrtst() {
 
       // calculateing average
 
-      if (config.verbous) debug("DB Count : " + converttostring(db.size()) , true);
+      //if (config.verbous) debug("DB Count : " + converttostring(db.size()) , true);
 
       if (config.verbous) debug("Calculateing average", false);
 
@@ -158,7 +158,7 @@ int receive_sdrtst() {
             dbc++;
           } else {
             db_avg.push_back(dbs / config.cmn);
-            if (config.verbous) debug("db noise block : " + converttostring(dbs / config.cmn), false);
+            //if (config.verbous) debug("db noise block : " + converttostring(dbs / config.cmn), false);
 
             dbs = 0;
             dbc = 0;
@@ -484,28 +484,32 @@ int getpeaks() {
         }
       }
       
-      if (vfq.size() > 0 && vfq.size() < (config.max_frequency_fql - wlc++) ) {
-        for (auto& vfge : vfq) { // creating the frequencieslist for dxlAPRS
-          debug(converttostring(vfge.frequency) + " " + converttostring(vfge.bandwidth) + " " + converttostring(vfge.timestamp), false);
-          string out_frequency = converttostring(vfge.frequency);
+      if (vfq.size() > 0) {
+        for (i = 0; i < vfq.size(); i++) {   // creating the frequencieslist for dxlAPRS
+          if (i < (config.max_frequency_fql - wlc++)) {
+            debug(converttostring(vfq[i].frequency) + " " + converttostring(vfq[i].bandwidth) + " " + converttostring(vfq[i].timestamp), false);
+            string out_frequency = converttostring(vfq[i].frequency);
 
-          out.append("f " + out_frequency.insert(3, ".") + " " + converttostring(vfge.afc) + " " + converttostring(config.squelch) + " " + converttostring(config.lowpass) + " " + converttostring(vfge.bandwidth * 1000) + " \t# " + vfge.serial + "\n");
-        }
-
-        for (i = 0; i < vfq.size(); i++) { 
-          if ( (gettimestamp() - vfq[i].timestamp) > config.timer_holding) { //check timestamp and remove from list
-            vfq.erase(vfq.begin() + i);
-          }
-          if ( (gettimestamp() - vfq[i].timestamp) > config.timer_serial) { //check serial and remove from list
-            if (vfq[i].serial.length() < 8) {
-              vfq.erase(vfq.begin() + i);
-            }
+            out.append("f " + out_frequency.insert(3, ".") + " " + converttostring(vfq[i].afc) + " " + converttostring(config.squelch) + " " + converttostring(config.lowpass) + " " + converttostring(vfq[i].bandwidth * 1000) + " \t# " + vfq[i].serial + "\n");
+          } else {
+            debug("Too many frequencies in the list", false);
           }
         }
       } else {
-        debug("Error Frequency list", false);
+        debug("Currently, no frequencies in the list", false);
       }
 
+      for (i = 0; i < vfq.size(); i++) { 
+        if ( (gettimestamp() - vfq[i].timestamp) > config.timer_holding) { //check timestamp and remove from list
+          vfq.erase(vfq.begin() + i);
+        }
+        if ( (gettimestamp() - vfq[i].timestamp) > config.timer_serial) { //check serial and remove from list
+          if (vfq[i].serial.length() < 8) {
+            vfq.erase(vfq.begin() + i);
+          }
+        }
+      }
+      
       string out_startfrequency = converttostring(config.startfrequency/1000);
       string out_stopfrequency = converttostring((config.startfrequency/1000)+2000);
 
