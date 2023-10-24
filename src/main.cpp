@@ -364,6 +364,7 @@ int getpeaks() {
             wfl.afc = converttoint(tokens[2]);
 
             vwl.push_back(wfl);
+            if (config.verbous) debug("Add to whitelist " + converttostring(wfl.frequency), false);
           }
           //if (config.verbous) debug(line, false);
         }
@@ -375,6 +376,23 @@ int getpeaks() {
     //--------------------------
 
     int i = 0;
+
+    string out = "# created with dxlAPRS_scanner at ";
+    out.append(gettime());
+    out.append("\n\n");
+
+    int wlc = 0;
+
+    if (vwl.size() > 0) {
+      for (i = 0; i < vwl.size(); i++) { 
+        if ((vwl[i].frequency) >= (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
+          string out_frequency = converttostring(vwl[i].frequency);
+
+          out.append("f " + out_frequency.insert(3, ".") + " " + converttostring(vwl[i].afc) + " " + converttostring(config.squelch) + " " + converttostring(config.lowpass) + " " + converttostring(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
+          wlc++;
+        }
+      }
+    }
 
     if (peaks.size() > 0) {
       debug("------------- peaks...", false);
@@ -453,10 +471,6 @@ int getpeaks() {
       }
       debug(converttostring(vfq.size()) + " frequencies saved in the list", false);
 
-      string out = "# created with dxlAPRS_scanner at ";
-      out.append(gettime());
-      out.append("\n\n");
-
       if (config.tuner_settings == 1) { // tuner setting enabled
         if (config.tuner_gain_correction != 0) {
         out.append("p 8 " + converttostring(config.tuner_gain_correction) + " \t\t# Tuner gain correction\n");
@@ -471,19 +485,6 @@ int getpeaks() {
         out.append("\n");
       }
 
-      int wlc = 0;
-
-      if (vwl.size() > 0) {
-        for (i = 0; i < vwl.size(); i++) { 
-          if ((vwl[i].frequency) >= (config.startfrequency / 1000) && (vwl[i].frequency) < ((config.startfrequency / 1000)+2000)) {
-            string out_frequency = converttostring(vwl[i].frequency);
-
-            out.append("f " + out_frequency.insert(3, ".") + " " + converttostring(vwl[i].afc) + " " + converttostring(config.squelch) + " " + converttostring(config.lowpass) + " " + converttostring(vwl[i].bandwidth * 1000) + " \t# Whitelist\n");
-            wlc++;
-          }
-        }
-      }
-      
       if (vfq.size() > 0) {
         for (i = 0; i < vfq.size(); i++) {   // creating the frequencieslist for dxlAPRS
           if (i < (config.max_frequency_fql - wlc++)) {
@@ -664,6 +665,14 @@ int main(int argc, char** argv) {
         config.lowpass = converttoint(argv[i+1]);
       } else {
         debug("Error : Lowpass settings", false);
+        return 0;
+      }
+    } 
+    if (strcmp(argv[i],"-m") == 0) { // max channels
+      if(i+1 < argc) {
+        config.max_frequency_fql = converttoint(argv[i+1]);
+      } else {
+        debug("Error : Max channel settings", false);
         return 0;
       }
     } 
