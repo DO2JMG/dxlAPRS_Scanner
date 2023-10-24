@@ -88,6 +88,7 @@ Argument|Description|Value
 `-w`|Filename whitelist|whitelist.txt
 `-n`|Level (Default is 5) > 5 higher sensitivity|`5`
 `-l`|audio lowpass|`0`
+`-m`|max frequencies|`10`
 `-v`|Verbous mode|
 
 ### Tuner Settings:
