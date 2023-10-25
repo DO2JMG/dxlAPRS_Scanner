@@ -9,9 +9,11 @@ You can find scripts to start dxlAPRS and the scanner here. https://github.com/D
 
 ### Example :
 
+Example frequency list created by the scanner
+
 <p><img src="https://github.com/DO2JMG/dxlAPRS_Scanner/blob/main/example.jpg"></p>
 
-Example frequency list created by the scanner
+
 
 ### Unpack and compile :
 
