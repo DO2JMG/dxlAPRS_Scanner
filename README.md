@@ -7,6 +7,12 @@ I would be very happy about ideas and further developments!
 
 You can find scripts to start dxlAPRS and the scanner here. https://github.com/DO2JMG/dxlAPRS_Scripte
 
+### Example :
+
+<p align="center"><img src="https://github.com/DO2JMG/dxlAPRS_Scanner/blob/main/example.jpg"></p>
+
+Example frequency list created by the scanner
+
 ### Unpack and compile :
 
 ```
