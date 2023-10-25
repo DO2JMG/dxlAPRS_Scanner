@@ -41,7 +41,7 @@ struct scanner_config {
   int maxbw = 22;
   int squelch = 65; 
   int lowpass = 0;
-  int timer_peaks = 30; // refresh frequency list after 60 seconds
+  int timer_peaks = 30; // refresh frequency list after 30 seconds
   int timer_holding = 180; // frequencies clear after 120 seconds
   int timer_serial = 60;
   int level = 5;
@@ -434,6 +434,9 @@ int getpeaks() {
             for (i = 0; i < vfq.size(); i++) { 
               if (compareNumbers((int)rounded_frequency, vfq[i].frequency, 10) == true) {
                 vfq[i].timestamp = gettimestamp();
+                if (vfq[i].serial.length() == 0) {
+                  vfq[i].bandwidth = nfq.bandwidth;
+                }
                 ison = true;
               }
             }
