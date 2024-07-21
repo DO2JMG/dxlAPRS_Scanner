@@ -186,10 +186,21 @@ int receive_sdrtst() {
 
 
         for (long unsigned i = 0; i < (db.size()); i++) { // add peaks to the list
-          if (db[i] > (avg_all + ((avg_all - avg_min)) - config.level)) {
+          int correctlevel = 0;
 
-            int ifq = (i)*config.steps + (config.startfrequency + 1500);
-          
+          int ifq = (i)*config.steps + (config.startfrequency + 1500);
+          int fqhz = (ifq - config.startfrequency); 
+
+          if (fqhz < 4100000) { correctlevel = 3; }
+          if (fqhz < 4500000) { correctlevel = 2; }
+          if (fqhz < 4800000) { correctlevel = 1; }
+
+          if (fqhz > 5100000) { correctlevel = 1; }
+          if (fqhz > 5500000) { correctlevel = 2; }
+          if (fqhz > 5800000) { correctlevel = 3; }
+
+          if (db[i] > (avg_all + ((avg_all - avg_min)) - (config.level + correctlevel))) {
+
             ifq = ifq/1000.0;  // hz in khz
           
             if (frequencyisonlist(ifq) == false && peaks.size() < config.max_frequency_fpl) { // frequency is not on the list
